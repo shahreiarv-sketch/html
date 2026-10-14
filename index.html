@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0f17" />
+  <title>XAUUSD · مرکز فرمان طلا</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg-0: #070a12;
+      --bg-1: #0d1322;
+      --card: rgba(20, 27, 43, 0.72);
+      --card-strong: rgba(24, 32, 50, 0.92);
+      --border: rgba(255, 255, 255, 0.09);
+      --border-gold: rgba(245, 176, 65, 0.45);
+      --gold: #f6c453;
+      --gold-2: #e79b2f;
+      --green: #2fd08a;
+      --red: #ff5c68;
+      --blue: #4f8dff;
+      --violet: #8b7bff;
+      --text: #eef2f9;
+      --muted: #8fa0bd;
+      --shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+      --radius: 20px;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: "Vazirmatn", "Segoe UI", Tahoma, system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1100px 520px at 82% -8%, rgba(246, 196, 83, 0.14), transparent 60%),
+        radial-gradient(900px 480px at 6% 4%, rgba(79, 141, 255, 0.14), transparent 58%),
+        linear-gradient(180deg, var(--bg-1), var(--bg-0));
+      background-attachment: fixed;
+      padding: 16px 14px calc(28px + env(safe-area-inset-bottom));
+      min-height: 100vh;
+    }
+    .wrap { max-width: 560px; margin: 0 auto; }
+
+    /* ---------- Header ---------- */
+    .hero {
+      position: relative; overflow: hidden;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-gold);
+      background: linear-gradient(135deg, rgba(246,196,83,0.16), rgba(231,155,47,0.05) 55%, rgba(20,27,43,0.4));
+      padding: 16px 16px 14px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+      animation: rise .5s ease both;
+    }
+    .hero::after {
+      content: ""; position: absolute; inset: -40% -10% auto auto; width: 240px; height: 240px;
+      background: radial-gradient(circle, rgba(246,196,83,0.35), transparent 65%);
+      filter: blur(10px); opacity: .5; pointer-events: none;
+    }
+    .hero-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand .coin {
+      width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center; font-size: 20px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-2));
+      box-shadow: 0 8px 22px rgba(246,196,83,0.35);
+    }
+    .brand h1 { font-size: 15px; margin: 0; font-weight: 800; letter-spacing: .2px; }
+    .brand .sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .price-pill {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(0,0,0,0.35); border: 1px solid var(--border);
+      padding: 8px 12px; border-radius: 999px; font-weight: 800; direction: ltr;
+      font-variant-numeric: tabular-nums; font-size: 14px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 0 rgba(47,208,138,.6); animation: pulse 1.8s infinite; }
+    @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(47,208,138,.55)} 70%{box-shadow:0 0 0 10px rgba(47,208,138,0)} 100%{box-shadow:0 0 0 0 rgba(47,208,138,0)} }
+    @keyframes rise { from{opacity:0; transform: translateY(10px)} to{opacity:1; transform:none} }
+
+    /* ---------- Cards ---------- */
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 14px; margin-bottom: 12px; box-shadow: var(--shadow);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      animation: rise .45s ease both;
+    }
+    .card h3 { margin: 0 0 10px; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat { background: rgba(255,255,255,0.035); border: 1px solid var(--border); border-radius: 14px; padding: 11px; }
+    .stat .lbl { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+    .stat .val { font-size: 18px; font-weight: 800; margin-top: 5px; direction: ltr; text-align: right; font-variant-numeric: tabular-nums; }
+    .up { color: var(--green); } .down { color: var(--red); }
+
+    /* ---------- Tabs ---------- */
+    .tabs { display: flex; gap: 8px; margin: 4px 0 14px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      flex: 1 0 auto; min-width: 84px; text-align: center; padding: 10px 12px; border-radius: 14px;
+      background: var(--card); border: 1px solid var(--border); color: var(--muted);
+      font-size: 12px; font-weight: 700; cursor: pointer; transition: .2s; white-space: nowrap;
+    }
+    .tab.active {
+      color: #0b0f17; border-color: transparent;
+      background: linear-gradient(135deg, var(--gold), var(--gold-2));
+      box-shadow: 0 10px 24px rgba(246,196,83,0.28);
+    }
+    .section { display: none; animation: rise .35s ease both; }
+    .section.active { display: block; }
+
+    /* ---------- Box visual ---------- */
+    .boxviz {
+      position: relative; height: 104px; border-radius: 16px; margin: 6px 0 10px;
+      background: linear-gradient(180deg, rgba(47,208,138,0.08), rgba(255,92,104,0.08));
+      border: 1px dashed var(--border); padding: 10px 12px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .boxviz .edge { display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .boxviz .edge.up { color: var(--green); } .boxviz .edge.low { color: var(--red); }
+    .boxviz .mid { text-align: center; color: var(--gold); font-weight: 800; font-size: 13px; }
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip { font-size: 11px; color: var(--muted); background: rgba(255,255,255,0.04); border: 1px solid var(--border); padding: 5px 10px; border-radius: 999px; }
+    .chip b { color: var(--text); }
+
+    /* ---------- Inputs & buttons ---------- */
+    label.fl { font-size: 12px; color: var(--muted); margin: 8px 0 4px; display: block; }
+    input, select {
+      width: 100%; padding: 12px; border-radius: 13px; border: 1px solid var(--border);
+      background: rgba(0,0,0,0.35); color: #fff; font-size: 14px; outline: none; transition: .2s;
+    }
+    input:focus, select:focus { border-color: var(--border-gold); box-shadow: 0 0 0 3px rgba(246,196,83,0.12); }
+    .btn {
+      width: 100%; padding: 13px; border-radius: 14px; border: none; font-weight: 800; font-size: 13px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px;
+      color: #fff; transition: transform .12s, filter .2s;
+    }
+    .btn:active { transform: scale(.975); }
+    .btn.gold { background: linear-gradient(135deg, var(--gold), var(--gold-2)); color: #0b0f17; box-shadow: 0 10px 26px rgba(246,196,83,0.28); }
+    .btn.green { background: linear-gradient(135deg, #27b981, #0f9d63); }
+    .btn.blue { background: linear-gradient(135deg, #4f8dff, #2f6be0); }
+    .btn.red { background: linear-gradient(135deg, #ff5c68, #d83a49); box-shadow: 0 10px 26px rgba(255,92,104,0.28); }
+    .btn.ghost { background: rgba(255,255,255,0.05); border: 1px solid var(--border); }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    /* ---------- Lists ---------- */
+    .item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--border); }
+    .item:last-child { border-bottom: none; }
+    .item .t { font-weight: 800; font-variant-numeric: tabular-nums; }
+    .item .s { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .pill { padding: 3px 9px; border-radius: 8px; font-size: 11px; font-weight: 700; }
+    .pill.buy { background: rgba(47,208,138,0.16); color: var(--green); }
+    .pill.sell { background: rgba(255,92,104,0.16); color: var(--red); }
+    .pill.gold { background: rgba(246,196,83,0.16); color: var(--gold); }
+    .iconbtn { background: rgba(255,92,104,0.14); color: var(--red); border: 1px solid rgba(255,92,104,0.3); border-radius: 10px; padding: 6px 11px; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .iconbtn:active { transform: scale(.95); }
+    .empty { color: var(--muted); font-size: 12px; padding: 8px 0; text-align: center; }
+    .danger-card { border-color: rgba(255,92,104,0.4); background: linear-gradient(135deg, rgba(255,92,104,0.08), rgba(20,27,43,0.6)); }
+
+    /* ---------- Toast ---------- */
+    #toast {
+      position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px);
+      background: var(--card-strong); border: 1px solid var(--border-gold); color: var(--text);
+      padding: 11px 18px; border-radius: 14px; font-size: 13px; font-weight: 700; opacity: 0;
+      transition: .3s; pointer-events: none; z-index: 99; box-shadow: var(--shadow); max-width: 88%;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .foot { text-align: center; color: var(--muted); font-size: 11px; margin-top: 14px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- هدر -->
+    <div class="hero">
+      <div class="hero-top">
+        <div class="brand">
+          <div class="coin">🏛</div>
+          <div>
+            <h1>مرکز فرمان طلا (XAUUSD)</h1>
+            <div class="sub" id="sync-time">در حال همگام‌سازی…</div>
+          </div>
+        </div>
+        <div class="price-pill"><span class="dot"></span><span id="live-price">$----.--</span></div>
+      </div>
+    </div>
+
+    <!-- تب‌ها -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('cockpit', this)">📊 کاکپیت</div>
+      <div class="tab" onclick="switchTab('levels', this)">🎯 لول‌ها</div>
+      <div class="tab" onclick="switchTab('alerts', this)">🔔 آلارم‌ها</div>
+      <div class="tab" onclick="switchTab('control', this)">⚙️ کنترل</div>
+    </div>
+
+    <!-- کاکپیت -->
+    <div id="tab-cockpit" class="section active">
+      <div class="card">
+        <h3>💼 وضعیت حساب</h3>
+        <div class="grid2">
+          <div class="stat"><div class="lbl">💵 بالانس</div><div class="val" id="v-balance">$0.00</div></div>
+          <div class="stat"><div class="lbl">💎 اکوئیتی</div><div class="val" id="v-equity">$0.00</div></div>
+          <div class="stat"><div class="lbl">📈 سود شناور</div><div class="val" id="v-profit">$0.00</div></div>
+          <div class="stat"><div class="lbl">🛡 مارجین آزاد</div><div class="val" id="v-margin">$0.00</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>📦 موتور اول: باکس ترمیم <span class="pill gold" id="box-mode" style="margin-inline-start:auto;">STANDBY</span></h3>
+        <div class="boxviz">
+          <div class="edge up"><span>سقف باکس (Upper)</span><span id="box-upper">—</span></div>
+          <div class="mid" id="box-mid">بدون چرخه فعال (آماده شکار)</div>
+          <div class="edge low"><span>کف باکس (Lower)</span><span id="box-lower">—</span></div>
+        </div>
+        <div class="chips">
+          <span class="chip">🔒 قفل متقابل: <b id="lock-state">—</b></span>
+          <span class="chip">⛩ توکیو: <b id="tokyo-state">STANDBY</b></span>
+        </div>
+      </div>
+
+      <button class="btn ghost" onclick="addHomeScreen()">📲 افزودن آیکون ربات به صفحه اصلی گوشی</button>
+    </div>
+
+    <!-- لول‌ها -->
+    <div id="tab-levels" class="section">
+      <div class="card">
+        <h3>➕ ثبت لول دستی (همگام با چارت MT5)</h3>
+        <label class="fl">قیمت دقیق طلا</label>
+        <input type="number" step="0.01" id="lv-price" placeholder="مثال: 4140.50" />
+        <label class="fl">عنوان لول</label>
+        <input type="text" id="lv-title" placeholder="مثال: کف هفتگی نقدینگی" />
+        <div class="row2">
+          <div>
+            <label class="fl">اعتبار</label>
+            <select id="lv-kind">
+              <option value="daily">📅 ۱ روزه</option>
+              <option value="weekly" selected>📆 ۱ هفته</option>
+              <option value="monthly">🗓 ۱ ماهه</option>
+              <option value="perm">♾ دائمی</option>
+            </select>
+          </div>
+          <div>
+            <label class="fl">نوع</label>
+            <select id="lv-dir">
+              <option value="BUY">🟢 تقاضا / حمایت</option>
+              <option value="SELL">🔴 عرضه / مقاومت</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn green" onclick="submitNewLevel()">✅ ثبت لول و ترسیم روی چارت</button>
+      </div>
+      <div class="card">
+        <h3>📋 لول‌های فعال حافظه</h3>
+        <div id="levels-list"><div class="empty">در حال بارگذاری…</div></div>
+      </div>
+    </div>
+
+    <!-- آلارم‌ها -->
+    <div id="tab-alerts" class="section">
+      <div class="card">
+        <h3>🔔 ثبت آلارم تکرارشونده</h3>
+        <label class="fl">قیمت هدف</label>
+        <input type="number" step="0.01" id="al-price" placeholder="مثال: 4215.00" />
+        <button class="btn blue" onclick="submitAlert()">🔔 فعال‌سازی آلارم</button>
+      </div>
+      <div class="card">
+        <h3>لیست آلارم‌های فعال</h3>
+        <div id="alerts-list"><div class="empty">در حال بارگذاری…</div></div>
+      </div>
+    </div>
+
+    <!-- کنترل -->
+    <div id="tab-control" class="section">
+      <div class="card">
+        <h3>⚙️ سوئیچ‌های عملیاتی</h3>
+        <div class="row2">
+          <button class="btn ghost" onclick="sendAction({action:'pause'})">⏸ توقف نرم</button>
+          <button class="btn ghost" onclick="sendAction({action:'resume'})">▶️ ادامه</button>
+        </div>
+        <button class="btn blue" onclick="sendAction({action:'toggle_lock'})">🔒 تغییر قفل متقابل</button>
+        <button class="btn ghost" onclick="sendAction({action:'download_log'})">📥 ارسال فایل کامل لاگ</button>
+      </div>
+      <div class="card danger-card">
+        <h3 style="color:var(--red)">🛑 منطقه خطر — خروج اضطراری</h3>
+        <p style="font-size:12px;color:var(--muted);margin:4px 0 8px;line-height:1.7">
+          بستن آنی تمام پوزیشن‌های باز و لغو کلیه سفارش‌های معلق در Thread اصلی متاتریدر (با تایید بیومتریک).
+        </p>
+        <button class="btn red" onclick="triggerBiometricPanic()">💥 تایید و بستن تمام معاملات</button>
+      </div>
+    </div>
+
+    <div class="foot">XAUUSD Recovery Bot · Glass Cockpit v4.2</div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg) { try { tg.ready(); tg.expand(); if (tg.requestFullscreen) tg.requestFullscreen(); } catch (e) {} }
+
+    function haptic(type) { try { if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(type || 'light'); } catch (e) {} }
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.innerText = msg; el.classList.add('show');
+      clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2200);
+    }
+    function switchTab(id, el) {
+      haptic('selection');
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab-' + id).classList.add('active');
+      el.classList.add('active');
+    }
+
+    // ---------- وضعیت ----------
+    function b64ToUtf8(b64) {
+      const bin = atob(b64);
+      const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+      return new TextDecoder('utf-8').decode(bytes);
+    }
+    function loadState() {
+      let state = null;
+      const params = new URLSearchParams(window.location.hash.slice(1));
+      if (params.has('state')) {
+        try {
+          state = JSON.parse(b64ToUtf8(params.get('state')));
+          localStorage.setItem('rc_last_state', JSON.stringify(state));
+        } catch (e) { console.warn(e); }
+      }
+      if (!state) {
+        try { const c = localStorage.getItem('rc_last_state'); if (c) state = JSON.parse(c); } catch (e) {}
+      }
+      if (state) renderState(state);
+      else document.getElementById('sync-time').innerText = 'در انتظار داده از ربات…';
+    }
+
+    function money(v) { return '$' + (Number(v) || 0).toFixed(2); }
+
+    function renderState(s) {
+      document.getElementById('live-price').innerText = s.price ? ('$' + Number(s.price).toFixed(2)) : '$----.--';
+      document.getElementById('sync-time').innerText = 'آخرین همگام‌سازی: ' + (s.time || '—');
+      const acc = s.acc || {};
+      document.getElementById('v-balance').innerText = money(acc.balance);
+      document.getElementById('v-equity').innerText = money(acc.equity);
+      const pf = Number(acc.profit || 0);
+      const pfEl = document.getElementById('v-profit');
+      pfEl.innerText = (pf >= 0 ? '+' : '') + money(pf).replace('$-', '-$');
+      pfEl.className = 'val ' + (pf >= 0 ? 'up' : 'down');
+      document.getElementById('v-margin').innerText = money(acc.margin_free);
+
+      document.getElementById('lock-state').innerText = s.lock ? '🔒 فعال' : '🔓 خاموش';
+      document.getElementById('tokyo-state').innerText = s.tokyo || 'STANDBY';
+
+      const box = s.box;
+      const modeEl = document.getElementById('box-mode');
+      if (box && box.active) {
+        modeEl.innerText = box.mode + ' (S' + box.stage + ')';
+        document.getElementById('box-upper').innerText = Number(box.upper).toFixed(2);
+        document.getElementById('box-lower').innerText = Number(box.lower).toFixed(2);
+        document.getElementById('box-mid').innerText = 'مرحله ' + box.stage + ' از ' + box.max_stage + ' · ' + (box.side || '');
+      } else {
+        modeEl.innerText = 'STANDBY';
+        document.getElementById('box-upper').innerText = '—';
+        document.getElementById('box-lower').innerText = '—';
+        document.getElementById('box-mid').innerText = 'بدون چرخه فعال (آماده شکار)';
+      }
+
+      const lv = document.getElementById('levels-list');
+      lv.innerHTML = '';
+      const levels = s.levels || [];
+      if (!levels.length) { lv.innerHTML = '<div class="empty">هیچ لولی ثبت نشده است.</div>'; }
+      levels.forEach(l => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        const cls = l.dir === 'SELL' ? 'sell' : (l.dir === 'BUY' ? 'buy' : 'gold');
+        div.innerHTML =
+          '<div><span class="t">' + Number(l.price).toFixed(2) + '</span> ' +
+          '<span class="pill ' + cls + '">' + (l.dir || 'AUTO') + '</span>' +
+          '<div class="s">' + (l.title || 'بدون عنوان') + ' · ' + (l.kind || '') + '</div></div>' +
+          '<button class="iconbtn" onclick="sendAction({action:\'del_level\', price:' + l.price + '})">حذف</button>';
+        lv.appendChild(div);
+      });
+
+      const al = document.getElementById('alerts-list');
+      al.innerHTML = '';
+      const alerts = s.alerts || [];
+      if (!alerts.length) { al.innerHTML = '<div class="empty">آلارم فعالی وجود ندارد.</div>'; }
+      alerts.forEach(a => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.innerHTML =
+          '<div>🔔 <span class="t">#' + a.id + '</span> — قیمت <span class="t">' + Number(a.price).toFixed(2) + '</span>' +
+          '<div class="s">' + (a.dir || '') + '</div></div>' +
+          '<button class="iconbtn" onclick="sendAction({action:\'del_alert\', id:' + a.id + '})">حذف</button>';
+        al.appendChild(div);
+      });
+    }
+
+    // ---------- ارسال به ربات ----------
+    function sendAction(payload) {
+      haptic('medium');
+      if (tg && tg.sendData) {
+        tg.sendData(JSON.stringify(payload));
+        toast('✅ ارسال شد به ربات');
+      } else {
+        toast('این صفحه باید از داخل تلگرام باز شود.');
+      }
+    }
+    function submitNewLevel() {
+      const price = parseFloat(document.getElementById('lv-price').value);
+      if (!price || isNaN(price)) { toast('لطفاً قیمت معتبر وارد کنید.'); return; }
+      sendAction({
+        action: 'add_level', price: price,
+        title: document.getElementById('lv-title').value.trim(),
+        kind: document.getElementById('lv-kind').value,
+        direction: document.getElementById('lv-dir').value,
+      });
+    }
+    function submitAlert() {
+      const price = parseFloat(document.getElementById('al-price').value);
+      if (!price || isNaN(price)) { toast('لطفاً قیمت معتبر وارد کنید.'); return; }
+      sendAction({ action: 'add_alert', price: price });
+    }
+    function triggerBiometricPanic() {
+      haptic('heavy');
+      const confirmPanic = () => {
+        if (tg && tg.showConfirm) {
+          tg.showConfirm('⚠️ آیا از بستن فوری تمام معاملات باز اطمینان دارید؟', (ok) => { if (ok) sendAction({ action: 'panic_close' }); });
+        } else if (window.confirm('آیا از بستن فوری تمام معاملات اطمینان دارید؟')) {
+          sendAction({ action: 'panic_close' });
+        }
+      };
+      try {
+        const B = tg && tg.BiometricManager;
+        if (B && B.isInited && B.isBiometricAvailable) {
+          B.authenticate({ reason: 'تایید خروج اضطراری معاملات طلا' }, (ok) => { if (ok) confirmPanic(); });
+        } else { confirmPanic(); }
+      } catch (e) { confirmPanic(); }
+    }
+    function addHomeScreen() {
+      if (tg && tg.addToHomeScreen) { try { tg.addToHomeScreen(); return; } catch (e) {} }
+      toast('کلاینت تلگرام شما از این قابلیت پشتیبانی نمی‌کند.');
+    }
+
+    loadState();
+  </script>
+</body>
+</html>
