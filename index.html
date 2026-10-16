@@ -178,6 +178,7 @@
         </div>
         <div class="price-pill"><span class="dot"></span><span id="live-price">$----.--</span></div>
       </div>
+      <button class="btn ghost" style="margin-top:12px" onclick="requestState()">🔄 دریافت دادهٔ زنده از ربات</button>
     </div>
 
     <!-- تب‌ها -->
@@ -313,12 +314,24 @@
       const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
       return new TextDecoder('utf-8').decode(bytes);
     }
+    function readStateParam() {
+      // اول query string (قابل اعتماد؛ تلگرام فقط hash را با tgWebAppData بازنویسی می‌کند)
+      try {
+        const sp = new URLSearchParams(window.location.search);
+        if (sp.has('state')) return sp.get('state');
+      } catch (e) {}
+      try {
+        const hp = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+        if (hp.has('state')) return hp.get('state');
+      } catch (e) {}
+      return null;
+    }
     function loadState() {
       let state = null;
-      const params = new URLSearchParams(window.location.hash.slice(1));
-      if (params.has('state')) {
+      const raw = readStateParam();
+      if (raw) {
         try {
-          state = JSON.parse(b64ToUtf8(params.get('state')));
+          state = JSON.parse(b64ToUtf8(raw));
           localStorage.setItem('rc_last_state', JSON.stringify(state));
         } catch (e) { console.warn(e); }
       }
@@ -326,7 +339,16 @@
         try { const c = localStorage.getItem('rc_last_state'); if (c) state = JSON.parse(c); } catch (e) {}
       }
       if (state) renderState(state);
-      else document.getElementById('sync-time').innerText = 'در انتظار داده از ربات…';
+      else document.getElementById('sync-time').innerText = 'منتظر داده… دکمهٔ «دریافت دادهٔ زنده» یا دکمهٔ مینی‌اپ داخل پیام‌های ربات را بزنید.';
+    }
+    function requestState() {
+      haptic('medium');
+      if (tg && tg.sendData) {
+        tg.sendData(JSON.stringify({ action: 'refresh' }));
+        toast('✅ درخواست ارسال شد؛ پیام جدید ربات را باز کن.');
+      } else {
+        toast('این صفحه باید از داخل تلگرام باز شود.');
+      }
     }
 
     function money(v) { return '$' + (Number(v) || 0).toFixed(2); }
